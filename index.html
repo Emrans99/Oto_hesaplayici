@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Basit ve hızlı oto hesaplayıcı">
+    <title>Oto Hesaplayıcı - Murat Gürbüz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e1b4b;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --result-color: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            user-select: none;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Hide number input arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            appearance: textfield; /* Firefox */
+            -moz-appearance: textfield;
+        }
+
+        .divisors-section {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .divisors-section h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .divisor-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .divisor-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .divisor-input-wrapper {
+            flex: 1;
+        }
+
+        .divisor-input {
+            width: 100% !important;
+            padding: 0.75rem 1rem !important;
+            font-size: 0.95rem !important;
+        }
+
+        .result-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .result-value {
+            margin-left: 0.5rem;
+            color: var(--result-color);
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.3s ease;
+        }
+
+        .result-value.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 1.5rem;
+            }
+            .divisor-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+            .result-wrapper {
+                justify-content: flex-start;
+                font-size: 1rem;
+                background: var(--card-bg);
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">Murat Gürbüz</div>
+    </header>
+
+    <main>
+        <div class="glass-card">
+            <h1>Bölme Hesaplayıcı</h1>
+            
+            <div class="input-group">
+                <label for="mainNumber">Ana Sayı (Bölünecek Miktar)</label>
+                <input type="number" id="mainNumber" placeholder="Örn: 1000" autofocus>
+            </div>
+            
+            <div class="divisors-section">
+                <h3>Bölen Değerler</h3>
+                
+                <!-- Divisor 1 -->
+                <div class="divisor-row">
+                    <div class="divisor-input-wrapper">
+                        <input type="number" class="divisor-input" value="60">
+                    </div>
+                    <div class="result-wrapper">
+                        = <span class="result-value">-</span>
+                    </div>
+                </div>
+                
+                <!-- Divisor 2 -->
+                <div class="divisor-row">
+                    <div class="divisor-input-wrapper">
+                        <input type="number" class="divisor-input" value="190">
+                    </div>
+                    <div class="result-wrapper">
+                        = <span class="result-value">-</span>
+                    </div>
+                </div>
+                
+                <!-- Divisor 3 -->
+                <div class="divisor-row">
+                    <div class="divisor-input-wrapper">
+                        <input type="number" class="divisor-input" value="275">
+                    </div>
+                    <div class="result-wrapper">
+                        = <span class="result-value">-</span>
+                    </div>
+                </div>
+                
+                <!-- Divisor 4 -->
+                <div class="divisor-row">
+                    <div class="divisor-input-wrapper">
+                        <input type="number" class="divisor-input" value="535">
+                    </div>
+                    <div class="result-wrapper">
+                        = <span class="result-value">-</span>
+                    </div>
+                </div>
+                
+                <!-- Divisor 5 -->
+                <div class="divisor-row">
+                    <div class="divisor-input-wrapper">
+                        <input type="number" class="divisor-input" value="400">
+                    </div>
+                    <div class="result-wrapper">
+                        = <span class="result-value">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="calculateBtn" class="btn">Böl ve Hesapla</button>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const mainNumberInput = document.getElementById('mainNumber');
+            const divisorInputs = document.querySelectorAll('.divisor-input');
+            const resultValues = document.querySelectorAll('.result-value');
+
+            // Format number to show up to 3 decimal places nicely without trailing zeros
+            const formatNumber = (num) => {
+                if (Number.isInteger(num)) return num;
+                return parseFloat(num.toFixed(3));
+            };
+
+            const calculate = () => {
+                const mainValue = parseFloat(mainNumberInput.value);
+
+                // Check if main number is valid
+                if (isNaN(mainValue)) {
+                    // Quick shake animation on error could be added, but simple focus works
+                    mainNumberInput.focus();
+                    mainNumberInput.style.borderColor = '#ef4444';
+                    setTimeout(() => {
+                        mainNumberInput.style.borderColor = 'var(--input-border)';
+                    }, 500);
+                    return;
+                }
+
+                // Calculate for each divisor
+                divisorInputs.forEach((input, index) => {
+                    const divisorValue = parseFloat(input.value);
+                    const resultSpan = resultValues[index];
+
+                    // Hide first for animation effect
+                    resultSpan.classList.remove('show');
+
+                    setTimeout(() => {
+                        if (isNaN(divisorValue) || divisorValue === 0) {
+                            resultSpan.textContent = "Hata";
+                            resultSpan.style.color = '#ef4444'; // Red
+                        } else {
+                            const result = mainValue / divisorValue;
+                            resultSpan.textContent = formatNumber(result);
+                            resultSpan.style.color = 'var(--result-color)'; // Green
+                        }
+                        
+                        // Trigger animation
+                        resultSpan.classList.add('show');
+                    }, 50 * index); // Stagger the animations slightly
+                });
+            };
+
+            // Calculate when button is clicked
+            calculateBtn.addEventListener('click', calculate);
+
+            // Calculate when Enter key is pressed in the main input
+            mainNumberInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    calculate();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
