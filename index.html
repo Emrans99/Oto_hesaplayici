@@ -85,7 +85,7 @@
             border-radius: 24px;
             padding: 2.5rem;
             width: 100%;
-            max-width: 500px;
+            max-width: 650px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -250,8 +250,13 @@
             <h1>Bölme Hesaplayıcı</h1>
             
             <div class="input-group">
-                <label for="mainNumber">Ana Sayı (Bölünecek Miktar)</label>
+                <label for="mainNumber">Ana Sayı (Dolar - $)</label>
                 <input type="number" id="mainNumber" placeholder="Örn: 1000" autofocus>
+            </div>
+            
+            <div class="input-group">
+                <label for="exchangeRate">Döviz Kuru (₺)</label>
+                <input type="number" id="exchangeRate" placeholder="Örn: 34.50" step="0.01">
             </div>
             
             <div class="input-group">
@@ -260,6 +265,10 @@
             </div>
 
             <div class="summary-section" style="margin-bottom: 2rem; background: rgba(0,0,0,0.1); padding: 1.5rem; border-radius: 16px; display: none;" id="summarySection">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                    <span style="color: var(--text-muted); font-size: 0.95rem;">TL Karşılığı:</span>
+                    <span id="tlAmount" style="font-weight: 600; color: var(--text-main); font-size: 1.1rem;">0</span>
+                </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
                     <span style="color: var(--text-muted); font-size: 0.95rem;">Kar Payı:</span>
                     <span id="profitAmount" style="font-weight: 600; color: #818cf8; font-size: 1.1rem;">0</span>
@@ -342,28 +351,47 @@
             };
 
             const calculate = () => {
-                const mainValue = parseFloat(mainNumberInput.value);
+                const dollarValue = parseFloat(mainNumberInput.value);
+                const exchangeRateInput = document.getElementById('exchangeRate');
+                const exchangeRateValue = parseFloat(exchangeRateInput.value);
                 const profitShareInput = document.getElementById('profitShare');
                 const profitShareValue = parseFloat(profitShareInput.value) || 0;
 
-                // Check if main number is valid
-                if (isNaN(mainValue)) {
-                    // Quick shake animation on error could be added, but simple focus works
-                    mainNumberInput.focus();
+                let hasError = false;
+
+                // Check if inputs are valid
+                if (isNaN(dollarValue)) {
                     mainNumberInput.style.borderColor = '#ef4444';
                     setTimeout(() => {
                         mainNumberInput.style.borderColor = 'var(--input-border)';
                     }, 500);
+                    hasError = true;
+                }
+
+                if (isNaN(exchangeRateValue) || exchangeRateValue <= 0) {
+                    exchangeRateInput.style.borderColor = '#ef4444';
+                    setTimeout(() => {
+                        exchangeRateInput.style.borderColor = 'var(--input-border)';
+                    }, 500);
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    if (isNaN(dollarValue)) mainNumberInput.focus();
+                    else exchangeRateInput.focus();
                     return;
                 }
 
+                const tlValue = dollarValue * exchangeRateValue;
+
                 // Calculate Profit Share and Remaining Amount
-                const profitAmount = mainValue * (profitShareValue / 100);
-                const remainingValue = mainValue - profitAmount;
+                const profitAmount = tlValue * (profitShareValue / 100);
+                const remainingValue = tlValue - profitAmount;
 
                 const summarySection = document.getElementById('summarySection');
-                document.getElementById('profitAmount').textContent = formatNumber(profitAmount);
-                document.getElementById('remainingAmount').textContent = formatNumber(remainingValue);
+                document.getElementById('tlAmount').textContent = formatNumber(tlValue) + " ₺";
+                document.getElementById('profitAmount').textContent = formatNumber(profitAmount) + " ₺";
+                document.getElementById('remainingAmount').textContent = formatNumber(remainingValue) + " ₺";
                 summarySection.style.display = 'block';
 
                 // Calculate for each divisor
@@ -386,7 +414,7 @@
                             // Fix potential floating point precision issues with modulo
                             remainder = Math.round(remainder * 1000) / 1000;
                             
-                            resultSpan.textContent = `${result} (Artan: ${formatNumber(remainder)})`;
+                            resultSpan.textContent = `${result} (Artan: ${formatNumber(remainder)} ₺)`;
                             resultSpan.style.color = 'var(--result-color)'; // Green
                         }
                         
