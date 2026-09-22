@@ -166,12 +166,40 @@
 
         .divisor-input-wrapper {
             flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .divisor-input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
 
         .divisor-input {
             width: 100% !important;
             padding: 0.75rem 1rem !important;
             font-size: 0.95rem !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+        
+        .divisor-input:focus {
+            box-shadow: none !important;
+            border-color: transparent !important;
+        }
+
+        .divisor-tl {
+            padding-right: 1rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            display: none;
+            white-space: nowrap;
         }
 
         .result-wrapper {
@@ -286,6 +314,7 @@
                 <div class="divisor-row">
                     <div class="divisor-input-wrapper">
                         <input type="number" class="divisor-input" value="60">
+                        <span class="divisor-tl">| 0 ₺</span>
                     </div>
                     <div class="result-wrapper">
                         = <span class="result-value">-</span>
@@ -296,6 +325,7 @@
                 <div class="divisor-row">
                     <div class="divisor-input-wrapper">
                         <input type="number" class="divisor-input" value="190">
+                        <span class="divisor-tl">| 0 ₺</span>
                     </div>
                     <div class="result-wrapper">
                         = <span class="result-value">-</span>
@@ -306,6 +336,7 @@
                 <div class="divisor-row">
                     <div class="divisor-input-wrapper">
                         <input type="number" class="divisor-input" value="275">
+                        <span class="divisor-tl">| 0 ₺</span>
                     </div>
                     <div class="result-wrapper">
                         = <span class="result-value">-</span>
@@ -316,6 +347,7 @@
                 <div class="divisor-row">
                     <div class="divisor-input-wrapper">
                         <input type="number" class="divisor-input" value="535">
+                        <span class="divisor-tl">| 0 ₺</span>
                     </div>
                     <div class="result-wrapper">
                         = <span class="result-value">-</span>
@@ -326,6 +358,7 @@
                 <div class="divisor-row">
                     <div class="divisor-input-wrapper">
                         <input type="number" class="divisor-input" value="400">
+                        <span class="divisor-tl">| 0 ₺</span>
                     </div>
                     <div class="result-wrapper">
                         = <span class="result-value">-</span>
@@ -398,18 +431,26 @@
                 divisorInputs.forEach((input, index) => {
                     const divisorValue = parseFloat(input.value);
                     const resultSpan = resultValues[index];
+                    const tlSpan = input.nextElementSibling;
 
                     // Hide first for animation effect
                     resultSpan.classList.remove('show');
+                    if (tlSpan) tlSpan.style.display = 'none';
 
                     setTimeout(() => {
                         if (isNaN(divisorValue) || divisorValue === 0) {
                             resultSpan.textContent = "Hata";
                             resultSpan.style.color = '#ef4444'; // Red
                         } else {
-                            // Calculate integer division and remainder
-                            const result = Math.floor(remainingValue / divisorValue);
-                            let remainder = remainingValue % divisorValue;
+                            const divisorTlValue = divisorValue * exchangeRateValue;
+                            if (tlSpan) {
+                                tlSpan.textContent = `| ${formatNumber(divisorTlValue)} ₺`;
+                                tlSpan.style.display = 'inline';
+                            }
+
+                            // Calculate integer division and remainder based on TL values
+                            const result = Math.floor(remainingValue / divisorTlValue);
+                            let remainder = remainingValue % divisorTlValue;
                             
                             // Fix potential floating point precision issues with modulo
                             remainder = Math.round(remainder * 1000) / 1000;
